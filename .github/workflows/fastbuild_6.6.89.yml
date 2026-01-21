@@ -507,13 +507,22 @@ jobs:
           echo "CONFIG_USB_SERIAL_CP210X=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_PL2303=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_CH341=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # ========== 你的KVM配置（保留不动） ==========
           echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_VGIC_V3=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_TIMER=y" >> ./common/arch/arm64/configs/gki_defconfig
-          # 新增：关闭客户机模式，消除冲突隐患
           echo "CONFIG_KVM_GUEST=n" >> ./common/arch/arm64/configs/gki_defconfig
+          # ========== 强制追加SM8750 Wi-Fi驱动配置（必须紧跟KVM配置之后） ==========
+          echo "CONFIG_WLAN=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_WLAN_VENDOR_QUALCOMM=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_QCA_WIFI=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_QCA65X4=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_QCOM_WCNSS_PCI=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_QCOM_WCNSS_QMI=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CFG80211=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_MAC80211=y" >> ./common/arch/arm64/configs/gki_defconfig
           #禁用 defconfig 检查
           sed -i 's/check_defconfig//' ./common/build.config.gki
           #跳过将uapi标准头安装到 usr/include 目录的不必要操作，节省编译时间
