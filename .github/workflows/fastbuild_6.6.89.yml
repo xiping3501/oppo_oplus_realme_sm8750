@@ -508,6 +508,12 @@ jobs:
           echo "CONFIG_USB_SERIAL_CP210X=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_PL2303=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_CH341=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # ========== 你的KVM配置 ==========
+          echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_VGIC_V3=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_TIMER=y" >> ./common/arch/arm64/configs/gki_defconfig
           #禁用 defconfig 检查
           sed -i 's/check_defconfig//' ./common/build.config.gki
           #跳过将uapi标准头安装到 usr/include 目录的不必要操作，节省编译时间
