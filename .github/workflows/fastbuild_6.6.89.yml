@@ -541,10 +541,6 @@ jobs:
           echo "CONFIG_BOOTLOCK=n" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_MMU_GUARD=n" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_QCOM_SECURE_BOOT=n" >> ./common/arch/arm64/configs/gki_defconfig
-
-
-
-
           # ========== 你的KVM配置 ==========
           echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
