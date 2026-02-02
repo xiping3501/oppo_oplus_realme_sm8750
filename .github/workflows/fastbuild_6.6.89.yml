@@ -508,6 +508,43 @@ jobs:
           echo "CONFIG_USB_SERIAL_CP210X=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_PL2303=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_CH341=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # ========== 全量KVM+EL2+VirtIO配置（适配GKI arm64）==========
+          # 1. 先清理可能的重复配置（避免echo追加冲突）
+          sed -i '/CONFIG_KVM=/d' ./common/arch/arm64/configs/gki_defconfig
+          sed -i '/CONFIG_VIRTUALIZATION=/d' ./common/arch/arm64/configs/gki_defconfig
+          sed -i '/CONFIG_VIRTIO=/d' ./common/arch/arm64/configs/gki_defconfig
+          sed -i '/CONFIG_HYPERVISOR_GUEST=/d' ./common/arch/arm64/configs/gki_defconfig
+          sed -i '/CONFIG_SECURITY_RKP=/d' ./common/arch/arm64/configs/gki_defconfig
+          sed -i '/CONFIG_BOOTLOCK=/d' ./common/arch/arm64/configs/gki_defconfig
+          # 2. 核心：开启虚拟化+EL2/VHE（/dev/kvm创建的基础）
+          echo "CONFIG_VIRTUALIZATION=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_VHE=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_VGIC_V3=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_TIMER=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_GENERIC_DIRTYLOG_READ=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_HYPERVISOR_GUEST=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # 3. VirtIO全配置（兼容你的虚拟化设备）
+          echo "CONFIG_VIRTIO=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_PCI=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_PCI_LEGACY=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_MMIO=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_BLK=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_NET=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_NET_ANDROID_COMPAT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_GPU=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_VIRTIO_INPUT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # 4. 关键：关闭内核保护（品牌机必关，否则屏蔽KVM）
+          echo "CONFIG_SECURITY_RKP=n" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_BOOTLOCK=n" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_MMU_GUARD=n" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_QCOM_SECURE_BOOT=n" >> ./common/arch/arm64/configs/gki_defconfig
+
+
+
+
           # ========== 你的KVM配置 ==========
           echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
