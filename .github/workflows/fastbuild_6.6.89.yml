@@ -495,11 +495,11 @@ jobs:
           echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
           if [[ "${{ github.event.inputs.lz4kd_enable }}" == "true" ]]; then
-            echo "CONFIG_ZSMALLOC=y" >> ./common/arch/arm64/configs/gki_defconfig
-            echo "CONFIG_CRYPTO_LZ4HC=y" >> ./common/arch/arm64/configs/gki_defconfig
-            echo "CONFIG_CRYPTO_LZ4K=y" >> ./common/arch/arm64/configs/gki_defconfig
-            echo "CONFIG_CRYPTO_LZ4KD=y" >> ./common/arch/arm64/configs/gki_defconfig
-            echo "CONFIG_CRYPTO_842=y" >> ./common/arch/arm64/configs/gki_defconfig
+           echo "CONFIG_ZSMALLOC=y" >> ./common/arch/arm64/configs/gki_defconfig
+           echo "CONFIG_CRYPTO_LZ4HC=y" >> ./common/arch/arm64/configs/gki_defconfig
+           echo "CONFIG_CRYPTO_LZ4K=y" >> ./common/arch/arm64/configs/gki_defconfig
+           echo "CONFIG_CRYPTO_LZ4KD=y" >> ./common/arch/arm64/configs/gki_defconfig
+           echo "CONFIG_CRYPTO_842=y" >> ./common/arch/arm64/configs/gki_defconfig
           fi
           # 开启O2编译优化配置
           echo "CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -541,21 +541,8 @@ jobs:
           echo "CONFIG_BOOTLOCK=n" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_MMU_GUARD=n" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_QCOM_SECURE_BOOT=n" >> ./common/arch/arm64/configs/gki_defconfig
-          # ========== 你的KVM配置 ==========
-          echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KVM_ARM_VGIC_V3=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KVM_ARM_TIMER=y" >> ./common/arch/arm64/configs/gki_defconfig
-          # 加入virtio
-          echo "CONFIG_VIRTIO=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_VIRTIO_PCI=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_VIRTIO_MMIO=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_VIRTIO_BLK=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_VIRTIO_NET=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_VIRTIO_NET_ANDROID_COMPAT=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_HYPERVISOR_GUEST=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_PGTABLE_LEVELS=4" >> ./common/arch/arm64/configs/gki_defconfig
+          # 内存页表配置
+            echo "CONFIG_PGTABLE_LEVELS=4" >> ./common/arch/arm64/configs/gki_defconfig
           #禁用 defconfig 检查
           sed -i 's/check_defconfig//' ./common/build.config.gki
           #跳过将uapi标准头安装到 usr/include 目录的不必要操作，节省编译时间
