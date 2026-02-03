@@ -508,6 +508,7 @@ jobs:
           echo "CONFIG_USB_SERIAL_CP210X=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_PL2303=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_USB_SERIAL_CH341=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_USB_SERIAL_FTDI_SIO=y" >> ./common/arch/arm64/configs/gki_defconfig
           # ========== 全量KVM+EL2+VirtIO配置（适配GKI arm64）==========
           # 1. 先清理可能的重复配置（避免echo追加冲突）
           sed -i '/CONFIG_KVM=/d' ./common/arch/arm64/configs/gki_defconfig
