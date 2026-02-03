@@ -131,6 +131,26 @@ jobs:
             sed -i 's/ -dirty//g' "$f"
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
+          wait
+          echo "所有源码及llvm-Clang18工具链初始化完成！"
+          echo "正在去除 ABI 保护 & 去除 dirty 后缀..."
+          rm common/android/abi_gki_protected_exports_* || true
+          for f in common/scripts/setlocalversion; do
+            sed -i 's/ -dirty//g' "$f"
+            sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
+          done
+
+      # 新增：替换定制Kconfig（开启KVM）
+      - name: 替换定制Kconfig（开启KVM）
+        run: |
+          # 拉取并覆盖arch/arm64/Kconfig
+          aria2c -s16 -x16 -k1M https://github.com/xiping3501/oppo_oplus_realme_sm8750/raw/main/arch-arm64-Kconfig -o common/arch/arm64/Kconfig
+          # 拉取并覆盖arch/arm64/kvm/Kconfig
+          aria2c -s16 -x16 -k1M https://github.com/xiping3501/oppo_oplus_realme_sm8750/raw/main/arch-arm64-kvm-Kconfig -o common/arch/arm64/kvm/Kconfig
+          # 验证文件替换状态
+          echo "Kconfig文件替换结果："
+          [ -f common/arch/arm64/Kconfig ] && echo "✅ arch/arm64/Kconfig 替换成功" || echo "❌ arch/arm64/Kconfig 替换失败"
+          [ -f common/arch/arm64/kvm/Kconfig ] && echo "✅ arch/arm64/kvm/Kconfig 替换成功" || echo "❌ arch/arm64/kvm/Kconfig 替换失败"
 
       - name: 配置ccache目录
         run: |
