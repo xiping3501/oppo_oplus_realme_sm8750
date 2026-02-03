@@ -154,6 +154,13 @@ config KVM_ARM_VFIO
 
 endif # KVM_ARM_HOST
 
+config KVM_ARM
+    bool "KVM for ARM (Common Code)"
+    depends on KVM_ARM_HOST
+    default y
+    help
+      Common KVM support for ARM.
+
 config HYPERVISOR_GUEST
     bool "Hypervisor guest support"
     default y
