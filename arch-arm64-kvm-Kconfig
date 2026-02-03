@@ -24,7 +24,7 @@ menuconfig KVM_ARM_HOST
     bool "KVM host support for ARM64"
     default y
     depends on KVM && VIRTUALIZATION
-    select KVM_ARM  # 就加这一行！！！
+    select KVM_ARM
     select KVM_IRQCHIP
     select ARM_GIC_V3_ITS if ACPI
     help
