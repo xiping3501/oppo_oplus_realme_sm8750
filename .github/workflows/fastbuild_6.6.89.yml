@@ -140,12 +140,12 @@ jobs:
             sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' "$f"
           done
 
-      # 新增：替换定制Kconfig（开启KVM）
+       # 新增：替换定制Kconfig（开启KVM）
       - name: 替换定制Kconfig（开启KVM）
         run: |
-          # 拉取并覆盖arch/arm64/Kconfig
+          # 拉取并覆盖arch/arm64/Kconfig（URL合并为单行）
           aria2c -s16 -x16 -k1M https://github.com/xiping3501/oppo_oplus_realme_sm8750/raw/main/arch-arm64-Kconfig -o common/arch/arm64/Kconfig
-          # 拉取并覆盖arch/arm64/kvm/Kconfig
+          # 拉取并覆盖arch/arm64/kvm/Kconfig（URL合并为单行）
           aria2c -s16 -x16 -k1M https://github.com/xiping3501/oppo_oplus_realme_sm8750/raw/main/arch-arm64-kvm-Kconfig -o common/arch/arm64/kvm/Kconfig
           # 验证文件替换状态
           echo "Kconfig文件替换结果："
