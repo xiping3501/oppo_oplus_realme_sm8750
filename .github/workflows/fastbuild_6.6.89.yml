@@ -751,60 +751,52 @@ jobs:
           echo "FAKETIME=$FAKETIME" >> $GITHUB_ENV
           SO_DIR=$(pwd)
           export PRELOAD_LIBS="$SO_DIR/libfakestat.so $SO_DIR/libfaketimeMT.so"
-          #创建 CC (编译器) 包装器
+          
+          # 创建CC包装器
           echo '#!/bin/bash' > cc-wrapper
-          echo 'export LD_PRELOAD="'$PRELOAD_LIBS'"' >> cc-wrapper
-          echo 'export FAKESTAT="'$FAKESTAT'"' >> cc-wrapper
-          echo 'export FAKETIME="'$FAKETIME'"' >> cc-wrapper
+          echo "export LD_PRELOAD=\"$PRELOAD_LIBS\"" >> cc-wrapper
+          echo "export FAKESTAT=\"$FAKESTAT\"" >> cc-wrapper
+          echo "export FAKETIME=\"$FAKETIME\"" >> cc-wrapper
           echo 'ccache clang "$@"' >> cc-wrapper
-          #创建 LD (链接器) 包装器
+          
+          # 创建LD包装器
           echo '#!/bin/bash' > ld-wrapper
-          echo 'export LD_PRELOAD="'$PRELOAD_LIBS'"' >> ld-wrapper
-          echo 'export FAKESTAT="'$FAKESTAT'"' >> ld-wrapper
-          echo 'export FAKETIME="'$FAKETIME'"' >> ld-wrapper
+          echo "export LD_PRELOAD=\"$PRELOAD_LIBS\"" >> ld-wrapper
+          echo "export FAKESTAT=\"$FAKESTAT\"" >> ld-wrapper
+          echo "export FAKETIME=\"$FAKETIME\"" >> ld-wrapper
           echo 'ld.lld "$@"' >> ld-wrapper
           
-          # 测试时间劫持测试是否正常工作
-          echo "--- [Wrapper Test] 正在创建通用的时间劫持测试脚本 ---"
+          # 测试时间劫持
+          echo "--- [Wrapper Test] 创建测试脚本 ---"
           echo '#!/bin/bash' > test-wrapper.sh
-          echo 'export LD_PRELOAD="'$PRELOAD_LIBS'"' >> test-wrapper.sh
-          echo 'export FAKESTAT="'$FAKESTAT'"' >> test-wrapper.sh
-          echo 'export FAKETIME="'$FAKETIME'"' >> test-wrapper.sh
-          echo 'echo ">>> Wrapper 内部环境检查完毕."' >> test-wrapper.sh
-          echo 'exec "$@"' >> test-wrapper.sh # 执行所有传入的参数
+          echo "export LD_PRELOAD=\"$PRELOAD_LIBS\"" >> test-wrapper.sh
+          echo "export FAKESTAT=\"$FAKESTAT\"" >> test-wrapper.sh
+          echo "export FAKETIME=\"$FAKETIME\"" >> test-wrapper.sh
+          echo 'echo ">>> Wrapper 环境检查完毕."' >> test-wrapper.sh
+          echo 'exec "$@"' >> test-wrapper.sh
           chmod +x test-wrapper.sh
-          echo "--- [Wrapper Test] 正在测试 (date) 命令 ---"
+          echo "--- [Wrapper Test] 测试date命令 ---"
           ./test-wrapper.sh date
-          echo "--- [Wrapper Test] 正在测试 (stat) 命令 ---"
+          echo "--- [Wrapper Test] 测试stat命令 ---"
           ./test-wrapper.sh stat ./Makefile
           echo "--- [Wrapper Test] 测试完毕 ---"
+          
           chmod +x cc-wrapper ld-wrapper
           echo "--- 编译前环境时间: $(LD_PRELOAD=$PRELOAD_LIBS date) ---"
-          echo "--- 编译前环境文件时间戳: ---"
+          echo "--- 编译前文件时间戳: ---"
           LD_PRELOAD=$PRELOAD_LIBS stat ./Makefile
           
-          #在构建内核的同时清除不必要的.NET, Android NDK, Haskell, CodeQL运行库，清理空间且不阻塞后续步骤运行
-          sudo rm -rf /usr/share/dotnet &
-          sudo rm -rf /usr/local/lib/android &
-          sudo rm -rf /opt/ghc &
-          sudo rm -rf /opt/hostedtoolcache/CodeQL &
+          # 清理冗余库
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL >/dev/null 2>&1 &
+          # 生成配置
           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error gki_defconfig &&
-
-          # ========== 新增：强制修复KVM ARM配置 ==========
+          
+          # 修复KVM配置
           echo "=== 强制启用ARM64 KVM支持 ==="
-
-          # 检查当前状态
-          echo "修复前："
-          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" .config 2>/dev/null || echo "未找到相关配置"
-
-          # 1. 先删除可能存在的旧配置
-          sed -i '/^CONFIG_KVM_ARM/d' .config
-          sed -i '/^CONFIG_KVM_ARM_HOST/d' .config
-          sed -i '/^# CONFIG_KVM_ARM/d' .config
-          sed -i '/^# CONFIG_KVM_ARM_HOST/d' .config
-
-          # 2. 然后添加新配置
-          cat >> .config << 'EOF'
+          echo "修复前KVM配置："
+          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" out/.config 2>/dev/null || echo "未找到配置"
+          sed -i -e '/CONFIG_KVM_ARM/d' out/.config
+          cat >> out/.config << 'EOF'
           CONFIG_KVM_ARM=y
           CONFIG_KVM_ARM_HOST=y
           CONFIG_KVM_ARM_VHE=y
@@ -815,24 +807,21 @@ jobs:
           CONFIG_KVM_ARM_TIMER=y
           CONFIG_KVM_ARM_PMU=y
           EOF
-
-          # 重新排序配置（保持整洁）
-          make olddefconfig
-
-          echo "修复后："
-          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" .config
-          # ========== 修复结束，继续编译 ==========
-
-          make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="$(pwd)/cc-wrapper" LD="$(pwd)/ld-wrapper" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error Image          
-          # 编译后时间劫持二次校验
+          make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out olddefconfig
+          echo "修复后KVM配置："
+          grep -E "^CONFIG_KVM_ARM(_HOST|_VHE|_NVHE|_PROTECTED_MODE)?=" out/.config
+          
+          # 编译内核
+          make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="$PWD/cc-wrapper" LD="$PWD/ld-wrapper" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error Image          
+          
+          # 编译后校验
           echo "--- 编译后环境时间: $(LD_PRELOAD=$PRELOAD_LIBS date) ---"
-          echo "--- 编译后环境文件时间戳: ---"
+          echo "--- 编译后文件时间戳: ---"
           LD_PRELOAD=$PRELOAD_LIBS stat ./Makefile
-          echo "内核编译完成！"
-          echo "ccache状态："
+          echo "内核编译完成！镜像路径：out/arch/arm64/boot/Image"
           ccache -s
-          echo "编译后空间:"
           df -h
+
          
       - name: 应用KPM并修补内核
         run: |
