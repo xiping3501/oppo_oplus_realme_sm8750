@@ -547,6 +547,9 @@ jobs:
           echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_TIMER=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_HYPERVISOR_GUEST=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_PROTECTED_MODE=n" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_ARM_NVHE=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KVM_GENERIC_DIRTYLOG_READ_PROTECT=y" >> ./common/arch/arm64/configs/gki_defconfig
           # 3. VirtIO全配置（兼容你的虚拟化设备）
           echo "CONFIG_VIRTIO=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_VIRTIO_PCI=y" >> ./common/arch/arm64/configs/gki_defconfig
