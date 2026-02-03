@@ -789,8 +789,43 @@ jobs:
           sudo rm -rf /opt/ghc &
           sudo rm -rf /opt/hostedtoolcache/CodeQL &
           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error gki_defconfig &&
-          make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="$(pwd)/cc-wrapper" LD="$(pwd)/ld-wrapper" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error Image
-          
+
+          # ========== 新增：强制修复KVM ARM配置 ==========
+          echo "=== 强制启用ARM64 KVM支持 ==="
+
+          # 检查当前状态
+          echo "修复前："
+          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" .config 2>/dev/null || echo "未找到相关配置"
+
+          # 强制写入所有必要的KVM ARM配置
+          cat >> .config << 'EOF'
+          # ===== 强制注入的KVM ARM配置 =====
+          CONFIG_KVM_ARM=y
+          CONFIG_KVM_ARM_HOST=y
+          CONFIG_KVM_ARM_VHE=y
+          CONFIG_KVM_ARM_NVHE=y
+          CONFIG_KVM_ARM_PROTECTED_MODE=n
+          CONFIG_KVM_ARM_VGIC_V3=y
+          CONFIG_KVM_ARM_VGIC_V2M=y
+          CONFIG_KVM_ARM_TIMER=y
+          CONFIG_KVM_ARM_PMU=y
+          # ===== 结束 =====
+          EOF
+
+          # 清理可能的冲突配置（如果被设为n）
+          sed -i '/^CONFIG_KVM_ARM/d' .config
+          sed -i '/^CONFIG_KVM_ARM_HOST/d' .config
+          sed -i '/^# CONFIG_KVM_ARM/d' .config
+          sed -i '/^# CONFIG_KVM_ARM_HOST/d' .config
+
+          # 重新排序配置（保持整洁）
+          make olddefconfig
+
+          echo "修复后："
+          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" .config
+          # ========== 修复结束，继续编译 ==========
+
+          make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="$(pwd)/cc-wrapper" LD="$(pwd)/ld-wrapper" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error Image          
           # 编译后时间劫持二次校验
           echo "--- 编译后环境时间: $(LD_PRELOAD=$PRELOAD_LIBS date) ---"
           echo "--- 编译后环境文件时间戳: ---"
