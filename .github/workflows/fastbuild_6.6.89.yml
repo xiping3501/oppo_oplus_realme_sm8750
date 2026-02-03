@@ -808,6 +808,10 @@ jobs:
           echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> out/.config
           echo "CONFIG_KVM_ARM_TIMER=y" >> out/.config
           echo "CONFIG_KVM_ARM_PMU=y" >> out/.config
+          echo "CONFIG_KVM_QCOM=y" >> out/.config
+          echo "CONFIG_KVM_GENERIC_DIRTYLOG_READ=y" >> out/.config
+          echo "CONFIG_HYPERVISOR_GUEST=y" >> out/.config
+          echo "CONFIG_KVM_GENERIC_DIRTYLOG_READ_PROTECT=y" >> out/.config
           # 应用配置
           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out olddefconfig
           # 容错：即使grep没找到也继续
