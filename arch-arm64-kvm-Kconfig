@@ -2,143 +2,158 @@
 #
 # KVM for ARM64 configuration
 #
+
+config VIRTUALIZATION
+    bool "Virtualization"
+    default y
+    help
+      Enable virtualization support.
+
+config KVM
+    bool "Kernel-based Virtual Machine (KVM) support"
+    default y
+    depends on VIRTUALIZATION
+    select KVM_MMIO
+    select KVM_GENERIC_DIRTYLOG_READ_PROTECT
+    select KVM_XFER_TO_GUEST_WORK
+    select KVM_GENERIC_HARDWARE_ENABLING
+    help
+      Enable KVM core framework.
+
 menuconfig KVM_ARM_HOST
-	bool "KVM host support for ARM64"
-	default y
-	select KVM
-	select KVM_MMIO
-	select KVM_GENERIC_DIRTYLOG_READ
-	select KVM_GENERIC_HARDWARE_ENABLING
-	select VIRTUALIZATION
-	select ARM_GIC_V3_ITS if ACPI
-	help
-	  This option enables KVM host support for ARM64.
+    bool "KVM host support for ARM64"
+    default y
+    depends on KVM && VIRTUALIZATION
+    select KVM_ARM  # 就加这一行！！！
+    select KVM_IRQCHIP
+    select ARM_GIC_V3_ITS if ACPI
+    help
+      Enable KVM host support for ARM64.
 
 if KVM_ARM_HOST
 
 config KVM_ARM_VHE
-	bool "VHE support"
-	default y
-	help
-	  This option enables support for Virtualization Host Extensions (VHE).
+    bool "VHE support"
+    default y
+    help
+      Enable Virtualization Host Extensions (VHE).
 
 config KVM_ARM_NVHE
-	bool "nVHE support"
-	default y
-	help
-	  This option enables support for non-Virtualization Host Extensions (nVHE).
+    bool "nVHE support"
+    default y
+    help
+      Enable non-Virtualization Host Extensions (nVHE).
 
 config KVM_ARM_PMU_V3
-	bool "PMUv3 virtualization support"
-	default y
-	depends on ARM_PMU
-	help
-	  This option enables support for virtualizing the PMUv3.
+    bool "PMUv3 virtualization support"
+    default y
+    depends on ARM_PMU
+    help
+      Virtualize PMUv3.
 
 config KVM_ARM_VGIC
-	tristate "VGIC virtual interrupt controller"
-	default y
-	select IRQ_DOMAIN
-	select KVM_IRQCHIP
-	help
-	  This option enables support for the virtual GIC interrupt controller.
+    tristate "VGIC virtual interrupt controller"
+    default y
+    select IRQ_DOMAIN
+    help
+      Enable virtual GIC interrupt controller.
 
 if KVM_ARM_VGIC
 
 config KVM_ARM_VGIC_V2
-	bool "GICv2 virtualization support"
-	default y
-	help
-	  This option enables support for virtualizing the GICv2 interrupt controller.
+    bool "GICv2 virtualization support"
+    default y
+    help
+      Virtualize GICv2.
 
 config KVM_ARM_VGIC_V3
-	bool "GICv3 virtualization support"
-	default y
-	help
-	  This option enables support for virtualizing the GICv3 interrupt controller.
+    bool "GICv3 virtualization support"
+    default y
+    help
+      Virtualize GICv3.
 
 config KVM_ARM_VGIC_V2M
-	bool "GICv2m virtualization support"
-	default y
-	help
-	  This option enables support for the GICv2m MSI doorbell.
+    bool "GICv2m virtualization support"
+    default y
+    help
+      Enable GICv2m MSI doorbell.
 
 config KVM_ARM_VGIC_MSI
-	bool "VGIC MSI support"
-	default y
-	depends on KVM_ARM_VGIC_V3
-	help
-	  This option enables support for MSI/MSI-X through the VGIC.
+    bool "VGIC MSI support"
+    default y
+    depends on KVM_ARM_VGIC_V3
+    help
+      Enable MSI/MSI-X through VGIC.
 
 endif # KVM_ARM_VGIC
 
 config KVM_ARM_TIMER
-	bool "ARM timer virtualization support"
-	default y
-	select KVM_TIMER
-	help
-	  This option enables support for virtualizing the ARM generic timer.
+    bool "ARM timer virtualization support"
+    default y
+    select KVM_TIMER
+    help
+      Virtualize ARM generic timer.
 
 config KVM_ARM_SVE
-	bool "SVE virtualization support"
-	default y
-	depends on ARM_SVE
-	help
-	  This option enables support for virtualizing the Scalable Vector Extension.
+    bool "SVE virtualization support"
+    default y
+    depends on ARM_SVE
+    help
+      Virtualize Scalable Vector Extension.
 
 config KVM_ARM_HOST_SVE
-	bool "SVE host support"
-	default y
-	depends on KVM_ARM_SVE
-	help
-	  This option enables SVE in the KVM host.
+    bool "SVE host support"
+    default y
+    depends on KVM_ARM_SVE
+    help
+      Enable SVE in KVM host.
 
 config KVM_ARM_PMU
-	bool "PMU virtualization support"
-	default y
-	depends on ARM_PMU
-	select KVM_ARM_PMU_V3
-	help
-	  This option enables support for virtualizing the ARM PMU.
+    bool "PMU virtualization support"
+    default y
+    depends on ARM_PMU
+    select KVM_ARM_PMU_V3
+    help
+      Virtualize ARM PMU.
 
 config KVM_ARM_DEBUG
-	bool "Debug virtualization support"
-	default y
-	help
-	  This option enables support for virtualizing debug registers.
+    bool "Debug virtualization support"
+    default y
+    help
+      Virtualize debug registers.
 
 config KVM_ARM_MTE
-	bool "MTE virtualization support"
-	default y
-	depends on ARM_MTE
-	help
-	  This option enables support for virtualizing the Memory Tagging Extension.
+    bool "MTE virtualization support"
+    default y
+    depends on ARM_MTE
+    help
+      Virtualize Memory Tagging Extension.
 
 config KVM_ARM_NESTED_VIRT
-	bool "Nested virtualization support"
-	default y
-	depends on KVM_ARM_VHE
-	help
-	  This option enables support for nested virtualization.
+    bool "Nested virtualization support"
+    default y
+    depends on KVM_ARM_VHE
+    help
+      Enable nested virtualization.
 
 config KVM_ARM_IPI
-	bool "KVM ARM IPI support"
-	default y
-	help
-	  This option enables support for inter-processor interrupts in KVM.
+    bool "KVM ARM IPI support"
+    default y
+    help
+      Enable inter-processor interrupts in KVM.
 
 config KVM_ARM_DMA_HOST_OPS
-	bool
-	default y
-	select DMA_OPS
+    bool
+    default y
+    select DMA_OPS
 
 config KVM_ARM_VFIO
-	bool
-	default y
-	select KVM_VFIO
+    bool
+    default y
+    select KVM_VFIO
 
 endif # KVM_ARM_HOST
 
 config HYPERVISOR_GUEST
-	bool "Hypervisor guest support"
-	default y
+    bool "Hypervisor guest support"
+    default y
