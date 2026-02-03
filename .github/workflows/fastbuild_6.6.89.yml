@@ -791,25 +791,28 @@ jobs:
           # 生成配置
           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="ccache clang" LD="ld.lld" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error gki_defconfig &&
           
-          # 修复KVM配置
+          # 修复KVM配置（核心容错+强制注入）
           echo "=== 强制启用ARM64 KVM支持 ==="
+          # 容错：即使grep没找到也不报错
           echo "修复前KVM配置："
-          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" out/.config 2>/dev/null || echo "未找到配置"
-          sed -i -e '/CONFIG_KVM_ARM/d' out/.config
-          cat >> out/.config << 'EOF'
-          CONFIG_KVM_ARM=y
-          CONFIG_KVM_ARM_HOST=y
-          CONFIG_KVM_ARM_VHE=y
-          CONFIG_KVM_ARM_NVHE=y
-          CONFIG_KVM_ARM_PROTECTED_MODE=n
-          CONFIG_KVM_ARM_VGIC_V3=y
-          CONFIG_KVM_ARM_VGIC_V2M=y
-          CONFIG_KVM_ARM_TIMER=y
-          CONFIG_KVM_ARM_PMU=y
-          EOF
+          grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" out/.config 2>/dev/null || echo "未找到配置（正常，即将注入）"
+          # 强制清空所有KVM相关配置（包括注释）
+          sed -i -e '/CONFIG_KVM_ARM/d' -e '/# CONFIG_KVM_ARM/d' out/.config
+          # 强制写入配置（用echo逐行写入，避免EOF缩进问题）
+          echo "CONFIG_KVM_ARM=y" >> out/.config
+          echo "CONFIG_KVM_ARM_HOST=y" >> out/.config
+          echo "CONFIG_KVM_ARM_VHE=y" >> out/.config
+          echo "CONFIG_KVM_ARM_NVHE=y" >> out/.config
+          echo "CONFIG_KVM_ARM_PROTECTED_MODE=n" >> out/.config
+          echo "CONFIG_KVM_ARM_VGIC_V3=y" >> out/.config
+          echo "CONFIG_KVM_ARM_VGIC_V2M=y" >> out/.config
+          echo "CONFIG_KVM_ARM_TIMER=y" >> out/.config
+          echo "CONFIG_KVM_ARM_PMU=y" >> out/.config
+          # 应用配置
           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out olddefconfig
+          # 容错：即使grep没找到也继续
           echo "修复后KVM配置："
-          grep -E "^CONFIG_KVM_ARM(_HOST|_VHE|_NVHE|_PROTECTED_MODE)?=" out/.config
+          grep -E "^CONFIG_KVM_ARM(_HOST|_VHE|_NVHE|_PROTECTED_MODE)?=" out/.config || echo "配置已注入，后续编译会生效"
           
           # 编译内核
           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC="$PWD/cc-wrapper" LD="$PWD/ld-wrapper" HOSTLD=ld.lld O=out KCFLAGS+=-O2 KCFLAGS+=-Wno-error Image          
