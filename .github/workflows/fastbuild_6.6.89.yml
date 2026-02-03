@@ -541,7 +541,6 @@ jobs:
           echo "CONFIG_VIRTUALIZATION=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KVM_QCOM=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_HOST=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_VHE=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KVM_ARM_VGIC_V3=y" >> ./common/arch/arm64/configs/gki_defconfig
