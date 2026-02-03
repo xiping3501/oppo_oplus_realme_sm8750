@@ -797,9 +797,14 @@ jobs:
           echo "修复前："
           grep -E "^(CONFIG_KVM_ARM|CONFIG_KVM_ARM_HOST)" .config 2>/dev/null || echo "未找到相关配置"
 
-          # 强制写入所有必要的KVM ARM配置
+          # 1. 先删除可能存在的旧配置
+          sed -i '/^CONFIG_KVM_ARM/d' .config
+          sed -i '/^CONFIG_KVM_ARM_HOST/d' .config
+          sed -i '/^# CONFIG_KVM_ARM/d' .config
+          sed -i '/^# CONFIG_KVM_ARM_HOST/d' .config
+
+          # 2. 然后添加新配置
           cat >> .config << 'EOF'
-          # ===== 强制注入的KVM ARM配置 =====
           CONFIG_KVM_ARM=y
           CONFIG_KVM_ARM_HOST=y
           CONFIG_KVM_ARM_VHE=y
@@ -809,14 +814,7 @@ jobs:
           CONFIG_KVM_ARM_VGIC_V2M=y
           CONFIG_KVM_ARM_TIMER=y
           CONFIG_KVM_ARM_PMU=y
-          # ===== 结束 =====
           EOF
-
-          # 清理可能的冲突配置（如果被设为n）
-          sed -i '/^CONFIG_KVM_ARM/d' .config
-          sed -i '/^CONFIG_KVM_ARM_HOST/d' .config
-          sed -i '/^# CONFIG_KVM_ARM/d' .config
-          sed -i '/^# CONFIG_KVM_ARM_HOST/d' .config
 
           # 重新排序配置（保持整洁）
           make olddefconfig
