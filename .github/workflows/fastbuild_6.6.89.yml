@@ -152,6 +152,15 @@ jobs:
           [ -f common/arch/arm64/Kconfig ] && echo "✅ arch/arm64/Kconfig 替换成功" || echo "❌ arch/arm64/Kconfig 替换失败"
           [ -f common/arch/arm64/kvm/Kconfig ] && echo "✅ arch/arm64/kvm/Kconfig 替换成功" || echo "❌ arch/arm64/kvm/Kconfig 替换失败"
 
+      # 新增：替换修改后的head.S（解锁EL2）
+      - name: 替换修改后的head.S（解锁EL2）
+        run: |
+          # 拉取修改后的head.S并覆盖到对应路径（根据你的源码路径调整）
+          aria2c -s16 -x16 -k1M https://github.com/xiping3501/oppo_oplus_realme_sm8750/raw/main/head.S -o common/arch/arm64/kernel/head.S
+          # 验证文件替换状态
+          echo "head.S文件替换结果："
+          [ -f common/arch/arm64/kernel/head.S ] && echo "✅ arch/arm64/kernel/head.S 替换成功" || echo "❌ arch/arm64/kernel/head.S 替换失败"
+
       - name: 配置ccache目录
         run: |
           echo "CCACHE_DIR=$HOME/.ccache_6.6.89" >> $GITHUB_ENV
